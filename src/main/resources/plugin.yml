@@ -1,0 +1,7 @@
+name: ChristmasTreeDecor
+version: '1.0-SNAPSHOT'
+main: com.loficostudios.christmasTreeDecor.ChristmasTreeDecor
+api-version: '1.21'
+authors: [tonierbobcat, loficostudios]
+website: www.loficostudios.com
+depend: [WorldGuard]

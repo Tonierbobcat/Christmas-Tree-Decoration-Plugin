@@ -1,0 +1,5 @@
+messages:
+  ORNAMENT_PLACED: ""
+  NO_ORNAMENT: ""
+  CANNOT_PLACE_ORNAMENT: "&cYou cannot place your ornament here!"
+  PERMISSION_DENIED: "&cYou don’t have permission to place an ornament on Christmas tree!"
