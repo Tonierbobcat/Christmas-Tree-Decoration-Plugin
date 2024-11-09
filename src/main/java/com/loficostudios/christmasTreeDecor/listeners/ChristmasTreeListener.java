@@ -1,17 +1,21 @@
 package com.loficostudios.christmasTreeDecor.listeners;
 
 import com.loficostudios.christmasTreeDecor.ChristmasTreeDecor;
-import com.loficostudios.christmasTreeDecor.Messages;
+import com.loficostudios.christmasTreeDecor.messages.Messages;
+import com.loficostudios.christmasTreeDecor.managers.ProfileManager;
+import com.loficostudios.christmasTreeDecor.records.Ornament;
 import com.loficostudios.christmasTreeDecor.utils.ColorUtil;
+import com.loficostudios.christmasTreeDecor.utils.Common;
 import com.loficostudios.christmasTreeDecor.utils.Debug;
 import com.loficostudios.christmasTreeDecor.utils.WorldGuardUtils;
-import com.sk89q.worldguard.protection.flags.StateFlag;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Skull;
+import org.bukkit.block.data.Directional;
+import org.bukkit.block.data.Rotatable;
 import org.bukkit.block.data.type.Leaves;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -24,57 +28,81 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.profile.PlayerProfile;
 import org.bukkit.util.Vector;
-
-import java.util.Objects;
+import org.jetbrains.annotations.NotNull;
 
 public class ChristmasTreeListener implements Listener {
 
     private final ChristmasTreeDecor plugin;
 
-    public ChristmasTreeListener(ChristmasTreeDecor plugin) {
+    private final ProfileManager profileManager;
+
+    public ChristmasTreeListener(ChristmasTreeDecor plugin, ProfileManager profileManager) {
         this.plugin = plugin;
+        this.profileManager = profileManager;
     }
     @EventHandler(priority = EventPriority.HIGHEST)
     private void christmasTreeInteractEvent(PlayerInteractEvent e) {
         Player player = e.getPlayer();
-        Block block = e.getClickedBlock();
-        ItemStack itemInHand = e.getItem();
-        BlockFace blockFace = e.getBlockFace();
 
-        if (player.isOp()
-                || block == null
-                || !e.getAction().equals(Action.RIGHT_CLICK_BLOCK)
-                || itemInHand == null)
-            return;
+        if (WorldGuardUtils.isPlayerInRegionWithFlag(player)) {
 
-        if (!hasOrnament(player, itemInHand.getItemMeta())) {
-            Debug.log("player does not have ornament in hand");
-            return;
+            Block block = e.getClickedBlock();
+            ItemStack itemInHand = e.getItem();
+            BlockFace blockFace = e.getBlockFace();
+
+            if (block == null || itemInHand == null)
+                return;
+
+            Vector direction = blockFace.getDirection();
+            Location origin = block.getLocation();
+
+            Block targetBlock = new Location(origin.getWorld(),
+                    origin.getX() + direction.getX(),
+                    origin.getY() + direction.getY(),
+                    origin.getZ() + direction.getZ()).getBlock();
+
+            profileManager.getProfile(player.getUniqueId()).ifPresent(profile -> {
+                if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+                    e.setCancelled(true);
+
+                    if (!hasOrnament(player, itemInHand.getItemMeta())) {
+                        Debug.log("player does not have ornament in hand");
+                        return;
+                    }
+
+                    if (!canPlaceOrnament(e, origin, targetBlock, direction))
+                        return;
+
+                    if (profile.addOrnament(targetBlock.getLocation())) {
+
+                        SkullMeta meta = (SkullMeta) itemInHand.getItemMeta();
+                        Ornament ornament = new Ornament(
+                                meta.getOwnerProfile(),
+                                targetBlock);
+
+                        handleOrnamentPlacement(player, ornament, blockFace);
+                    }
+
+                } else if (e.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
+                    e.setCancelled(false);
+
+                    if (block.getType().equals(Material.PLAYER_HEAD) || block.getType().equals(Material.PLAYER_WALL_HEAD)) {
+                        e.setCancelled(true);
+
+                        if (profile.isPlayerOrnamentOwner(block.getLocation())) {
+
+                        }
+                    }
+                }
+            });
         }
-
-        Vector direction = blockFace.getDirection();
-        Location origin = block.getLocation();
-
-        Block targetBlock = new Location(origin.getWorld(),
-                origin.getX() + direction.getX(),
-                origin.getY() + direction.getY(),
-                origin.getZ() + direction.getZ()).getBlock();
-        if (!canPlaceOrnament(e, origin, targetBlock, direction))
-            return;
-
-        SkullMeta meta = (SkullMeta) itemInHand.getItemMeta();
-        Ornament ornament = new Ornament(
-                meta.getOwnerProfile(),
-                targetBlock);
-
-        handleOrnamentPlacement(player, ornament, blockFace);
     }
 
-    private void handleOrnamentPlacement(Player player, Ornament ornament, BlockFace blockFace) {
+    private void handleOrnamentPlacement(final Player player, @NotNull Ornament ornament, BlockFace blockFace) {
         Vector direction = blockFace.getDirection();
 
-        PlayerProfile profile = ornament.getProfile();
-        Block ornementBlock = ornament.getBlock();
+        PlayerProfile profile = ornament.profile();
+        Block ornementBlock = ornament.block();
 
         if (direction.getY() > 0) {
             ornementBlock.setType(Material.PLAYER_HEAD);
@@ -86,6 +114,17 @@ public class ChristmasTreeListener implements Listener {
 
             skull.setOwnerProfile(profile);
             skull.update();
+
+            if (ornementBlock.getBlockData() instanceof Rotatable) {
+                Rotatable rotatable = (Rotatable) ornementBlock.getBlockData();
+
+                BlockFace rotation = Common.getDirectionFromCamera(player.getLocation().getYaw());
+
+                player.sendMessage("facing " + rotation + " yaw" + player.getLocation().getYaw());
+
+                rotatable.setRotation(rotation.getOppositeFace());
+                ornementBlock.setBlockData(rotatable);
+            }
         }
         else if (direction.getY() == 0) {
             ornementBlock.setType(Material.PLAYER_WALL_HEAD);
@@ -112,12 +151,6 @@ public class ChristmasTreeListener implements Listener {
 
     private boolean canPlaceOrnament(PlayerInteractEvent e, Location origin, Block target, Vector direction) {
         Player player = e.getPlayer();
-
-        if (WorldGuardUtils.checkFlag(player, ChristmasTreeDecor.ALLOW_ORNAMENTS, StateFlag.State.DENY)) {
-            //sendMessage(player, Messages.NOT_IN_REGION);
-            return false;
-        }
-        e.setCancelled(true);
 
         if (!player.hasPermission(ChristmasTreeDecor.ORNAMENT_PERMISSION)) {
             sendMessage(player, Messages.PERMISSION_DENIED);

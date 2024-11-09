@@ -5,3 +5,8 @@ api-version: '1.21'
 authors: [tonierbobcat, loficostudios]
 website: www.loficostudios.com
 depend: [WorldGuard]
+commands:
+  ornaments:
+    description: "Manages Ornaments"
+    usage: "/ornaments <arg>"
+    permission: christmastreedecor.admin

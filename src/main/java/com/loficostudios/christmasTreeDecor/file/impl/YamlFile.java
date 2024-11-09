@@ -76,14 +76,12 @@ public class YamlFile implements IFlatFile {
         }
 
         this.config = YamlConfiguration.loadConfiguration(file);
-
     }
 
     @SneakyThrows
     @Override
     public void save() {
         this.config.save(file);
-        Bukkit.getLogger().info("File saved successfully.");
     }
 
     @Override

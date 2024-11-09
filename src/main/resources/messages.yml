@@ -1,5 +1,10 @@
 messages:
+  # PLACEHOLDERS
+  # {max} max amount of ornaments player can have
   ORNAMENT_PLACED: ""
   NO_ORNAMENT: ""
   CANNOT_PLACE_ORNAMENT: "&cYou cannot place your ornament here!"
   PERMISSION_DENIED: "&cYou don’t have permission to place an ornament on Christmas tree!"
+  MAX_ORNAMENTS: "&cYou cannot place any more ornaments. {max}"
+  ORNAMENT_REMOVE_ALLOW: "&aSuccessfully removed ornament"
+  ORNAMENT_REMOVE_DENY: "&cThis ornament is not yours"
