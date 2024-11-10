@@ -28,12 +28,11 @@ public class WorldGuardUtils {
 
         ApplicableRegionSet regions = regionManager.getApplicableRegions(BukkitAdapter.asBlockVector(playerLocation));
 
-        // Iterate through each region to check for the flag
         for (ProtectedRegion region : regions) {
             if (region.getFlag(ChristmasTreeDecor.ALLOW_ORNAMENTS) == StateFlag.State.ALLOW) {
                 return true; // Player is in a region with the specified flag set to ALLOW
             }
         }
-        return false; // No region with the specified flag found
+        return false;
     }
 }

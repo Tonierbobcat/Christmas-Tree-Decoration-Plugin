@@ -1,6 +1,5 @@
 package com.loficostudios.christmasTreeDecor.camera;
 
-import com.loficostudios.christmasTreeDecor.utils.Common;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 //import org.bukkit.entity.Player;
@@ -26,10 +25,10 @@ public class Camera {
         float yaw = player.getLocation().getYaw();
 
         // Normalize yaw to a range of 0° to 360°
-        yaw = (yaw % 360 + 360) % 360; // Converts negative yaw to positive equivalent
+        yaw = (yaw % 360 + 360) % 360;
 
         // Divide by 22.5° to get one of the 16 possible directions
-        int angle = Math.round(yaw / 22.5f); // 360° / 16 directions = 22.5° per direction
+        int angle = Math.round(yaw / 22.5f);
 
         return switch (angle) {
             case 1 -> BlockFace.NORTH_NORTH_EAST;
