@@ -37,7 +37,7 @@ public final class ChristmasTreeDecor extends JavaPlugin {
 
     public static StateFlag ALLOW_ORNAMENTS;
 
-    public static final String PLUGIN_PREFIX = "christmas_tree.";
+    public static final String PLUGIN_PREFIX = "christmastreedecor.";
 
     public static Permission ORNAMENT_PERMISSION = new Permission(PLUGIN_PREFIX + "decorator");
 

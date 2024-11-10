@@ -1,6 +1,7 @@
 package com.loficostudios.christmasTreeDecor.listeners;
 
 import com.loficostudios.christmasTreeDecor.ChristmasTreeDecor;
+import com.loficostudios.christmasTreeDecor.camera.Camera;
 import com.loficostudios.christmasTreeDecor.messages.Messages;
 import com.loficostudios.christmasTreeDecor.managers.ProfileManager;
 import com.loficostudios.christmasTreeDecor.records.Ornament;
@@ -118,9 +119,10 @@ public class ChristmasTreeListener implements Listener {
             if (ornementBlock.getBlockData() instanceof Rotatable) {
                 Rotatable rotatable = (Rotatable) ornementBlock.getBlockData();
 
-                BlockFace rotation = Common.getDirectionFromCamera(player.getLocation().getYaw());
 
-                player.sendMessage("facing " + rotation + " yaw" + player.getLocation().getYaw());
+                Camera camera = new Camera(player);
+
+                BlockFace rotation = camera.getDirection();
 
                 rotatable.setRotation(rotation.getOppositeFace());
                 ornementBlock.setBlockData(rotatable);
