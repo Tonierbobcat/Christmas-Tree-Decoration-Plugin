@@ -47,10 +47,11 @@ public class ChristmasTreeListener implements Listener {
         if (WorldGuardUtils.isPlayerInRegionWithFlag(player)) {
 
             Block block = e.getClickedBlock();
+
             ItemStack itemInHand = e.getItem();
             BlockFace blockFace = e.getBlockFace();
 
-            if (block == null || itemInHand == null)
+            if (block == null)
                 return;
 
             Vector direction = blockFace.getDirection();
@@ -63,6 +64,8 @@ public class ChristmasTreeListener implements Listener {
 
             profileManager.getProfile(player.getUniqueId()).ifPresent(profile -> {
                 if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+                    if (itemInHand == null)
+                        return;
                     e.setCancelled(true);
 
                     if (!hasOrnament(player, itemInHand.getItemMeta())) {
@@ -80,7 +83,7 @@ public class ChristmasTreeListener implements Listener {
                                 meta.getOwnerProfile(),
                                 targetBlock);
 
-                        handleOrnamentPlacement(player, ornament, blockFace);
+                        handleOrnamentPlacement(player, itemInHand, ornament, blockFace);
                     }
 
                 } else if (e.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
@@ -93,12 +96,13 @@ public class ChristmasTreeListener implements Listener {
 
                         }
                     }
+
                 }
             });
         }
     }
 
-    private void handleOrnamentPlacement(final Player player, @NotNull Ornament ornament, BlockFace blockFace) {
+    private void handleOrnamentPlacement(final Player player, ItemStack inHand, @NotNull Ornament ornament, BlockFace blockFace) {
         Vector direction = blockFace.getDirection();
 
         PlayerProfile profile = ornament.profile();
@@ -141,6 +145,7 @@ public class ChristmasTreeListener implements Listener {
             skull.update();
         }
 
+        inHand.setAmount(inHand.getAmount() - 1);
         sendMessage(player, Messages.ORNAMENT_PLACED);
     }
 

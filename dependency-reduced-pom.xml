@@ -37,7 +37,7 @@
       <plugin>
         <artifactId>maven-jar-plugin</artifactId>
         <configuration>
-          <outputDirectory>C:\Users\Tonierbobcat\Desktop\Projects\-- COMMISSIONS --\ChristmasTreeDecor\.testserver\plugins</outputDirectory>
+          <outputDirectory>C:\Users\Tonierbobcat\Desktop\Projects\-- COMMISSIONS --\darkchroma\ChristmasTreeDecor\.testserver\plugins</outputDirectory>
         </configuration>
       </plugin>
     </plugins>
